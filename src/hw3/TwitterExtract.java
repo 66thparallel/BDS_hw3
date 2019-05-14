@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,6 +24,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
@@ -41,7 +43,7 @@ public class TwitterExtract {
 		List<String> stopwords = new ArrayList<String>();
 		Map<String, Integer> hashtags = new HashMap<String, Integer>();
 		Map<String, Integer> mentions = new HashMap<String, Integer>();
-		String filename = "data/sentiment140.csv";
+		String filename = "data/sentiment140_part.csv";
 
 		// Read sentiment140.csv and extract the "text" column of raw tweets.
 		BufferedReader reader;
@@ -159,191 +161,178 @@ public class TwitterExtract {
 			texts[i] = texts[i].replaceAll("^( )+", "");
 			texts[i] = texts[i].replaceAll("(  )+", " ");
 			texts[i] = texts[i].replaceAll("\n", ", ");
+			texts[i] = texts[i].replaceAll("[!@#$%^&+=.,:;’'\"�()?]+", "");
+			texts[i] = texts[i].replaceAll("[0-9]+", "");
+			texts[i] = texts[i].replaceAll("^-", "");
+			texts[i] = texts[i].replaceAll("-$", "");
+			texts[i] = texts[i].replaceAll("\\]", "");
+			texts[i] = texts[i].replaceAll("\\[", "");
 			
 			// Remove stopwords
-			tempstr = texts[i].split(" ");
-			for (String s: tempstr) { if(s != null) { tokens.add(s); }}
+			tempstr = texts[i].split("\\s+");
+			for (String s: tempstr) { if(s!=null || s!="") { tokens.add(s); }}
 			for(String word: stopwords){
 				if(tokens.contains(word)) { tokens.removeAll(Collections.singleton(word)); }
 			}
-			
-			// Find unigrams
-			for (String grams: tokens) {
-				if (onegrams.containsKey(grams)) { onegrams.put(grams, onegrams.get(grams) + 1); } 
-				else { onegrams.put(grams, 1); }
-			}ngramList.clear();
-			
-			// Find bigrams
-			int k = 1;
-			n = 2;
-			String ngramstr = "";
-			for (int j=0; j<tokens.size()-n; j++) {
-				ngramstr = tokens.get(j);			
-				while (k < n) {
-					ngramstr += " " + tokens.get(j+k);
-					k++;
-				}
-				k = 1;
-				ngramList.add(ngramstr);
-			}
-			for (String grams: ngramList) {
-				if (twograms.containsKey(grams)) { twograms.put(grams, twograms.get(grams) + 1); } 
-				else { twograms.put(grams, 1); }
-			}ngramList.clear();
-			
-			// Find trigrams
-			n = 3;
-			k = 1;
-			for (int l=0; l<tokens.size()-n; l++) {
-				ngramstr = tokens.get(l);
-				while (k < n) { ngramstr += " " + tokens.get(l+k); k++; }
-				k = 1;
-				ngramList.add(ngramstr);
-			}
-			for (String grams: ngramList) {
-				if (threegrams.containsKey(grams)) { threegrams.put(grams, threegrams.get(grams) + 1); } 
-				else { threegrams.put(grams, 1); }
-			}ngramList.clear();
-
-			// Find fourgrams
-			n = 4;
-			k = 1;
-			for (int m=0; m<tokens.size()-n; m++) {
-				ngramstr = tokens.get(m);
-				while (k < n) { ngramstr += " " + tokens.get(m+k); k++; }
-				k = 1;
-				ngramList.add(ngramstr);
-			}
-			for (String grams: ngramList) {
-				if (fourgrams.containsKey(grams)) { fourgrams.put(grams, fourgrams.get(grams) + 1); } 
-				else { fourgrams.put(grams, 1); }
-			}ngramList.clear();
-			
-			// create a Stanford CoreNLP object with POS tagging, dependency parser, and NER
-			Map<String, Integer> named_entities = new HashMap<String, Integer>();
-			String basicstr = "";
-			
-	        Properties props = new Properties();
-	        props.setProperty("annotators", "tokenize, ssplit, pos, lemma, depparse, ner");
-	        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-	        
-	        // convert list of tokenized text to a string for Stanford NLP library functions
-	        for (String t: tokens) { basicstr += t + " "; pos_tokens.add(t); }
-	        
-	        // Remove all parts-of-speech except nouns with (POS) tagger
-	        Annotation document = new Annotation(basicstr);
-	        pipeline.annotate(document);
-	        List<CoreMap> sentences = document.get(SentencesAnnotation.class);
-	        sentences = document.get(SentencesAnnotation.class);
-	        
-	        for(CoreMap sentence: sentences) {
-	        	for (CoreLabel token: sentence.get(TokensAnnotation.class)) {
-	        		String word = token.get(TextAnnotation.class);
-	        		String pos = token.get(PartOfSpeechAnnotation.class);
-	        		String ner = token.get(NamedEntityTagAnnotation.class);
-	        		// Get nouns
-	        		if(pos.matches("NN|NNP|NNPS|PRP")) {
-	        			pos_tokens.add(word);
-	        		}
-//	        		// Get NERs
-//	        		if(ner!=null) {
-//	        			if (named_entities.containsKey(word)) { named_entities.put(word, pos_twograms.get(word) + 1); } 
-//	    				else { named_entities.put(word, 1); }
-//	        		}
-	        	}
-	        }
-	        
-			// Find unigram nouns only
-			for (String grams: pos_tokens) {
-				if (pos_onegrams.containsKey(grams)) { pos_onegrams.put(grams, pos_onegrams.get(grams) + 1); } 
-				else { pos_onegrams.put(grams, 1); }
-			}ngramList.clear();
-			
-			// Find bigram nouns only
-			k = 1;
-			n = 2;
-			ngramstr = "";
-			for (int j=0; j<pos_tokens.size()-n; j++) {
-				ngramstr = pos_tokens.get(j);			
-				while (k < n) {
-					ngramstr += " " + pos_tokens.get(j+k);
-					k++;
-				}
-				k = 1;
-				ngramList.add(ngramstr);
-			}
-			for (String grams: ngramList) {
-				if (pos_twograms.containsKey(grams)) { pos_twograms.put(grams, pos_twograms.get(grams) + 1); } 
-				else { pos_twograms.put(grams, 1); }
-			}ngramList.clear();
-			
-			// Find trigram nouns only
-			n = 3;
-			k = 1;
-			for (int l=0; l<pos_tokens.size()-n; l++) {
-				ngramstr = pos_tokens.get(l);
-				while (k < n) { ngramstr += " " + pos_tokens.get(l+k); k++; }
-				k = 1;
-				ngramList.add(ngramstr);
-			}
-			for (String grams: ngramList) {
-				if (pos_threegrams.containsKey(grams)) { pos_threegrams.put(grams, pos_threegrams.get(grams) + 1); } 
-				else { pos_threegrams.put(grams, 1); }
-			}ngramList.clear();
-
-			// Find fourgram nouns only
-			n = 4;
-			k = 1;
-			for (int m=0; m<pos_tokens.size()-n; m++) {
-				ngramstr = pos_tokens.get(m);
-				while (k < n) { ngramstr += " " + pos_tokens.get(m+k); k++; }
-				k = 1;
-				ngramList.add(ngramstr);
-			}
-			for (String grams: ngramList) {
-				if (pos_fourgrams.containsKey(grams)) { pos_fourgrams.put(grams, pos_fourgrams.get(grams) + 1); } 
-				else { pos_fourgrams.put(grams, 1); }
-			}
-			ngramList.clear(); pos_tokens.clear(); tokens.clear();
 		}
+			
+//			// Find unigrams
+//			for (String grams: tokens) {
+//				if (onegrams.containsKey(grams)) { onegrams.put(grams, onegrams.get(grams) + 1); } 
+//				else { onegrams.put(grams, 1); }
+//			}ngramList.clear();
+//			
+//			// Find bigrams
+//			int k = 1;
+//			n = 2;
+//			String ngramstr = "";
+//			for (int j=0; j<tokens.size()-n; j++) {
+//				ngramstr = tokens.get(j);			
+//				while (k < n) {
+//					ngramstr += " " + tokens.get(j+k);
+//					k++;
+//				}
+//				k = 1;
+//				ngramList.add(ngramstr);
+//			}
+//			for (String grams: ngramList) {
+//				if (twograms.containsKey(grams)) { twograms.put(grams, twograms.get(grams) + 1); } 
+//				else { twograms.put(grams, 1); }
+//			}ngramList.clear();
+//			
+//			// Find trigrams
+//			n = 3;
+//			k = 1;
+//			for (int l=0; l<tokens.size()-n; l++) {
+//				ngramstr = tokens.get(l);
+//				while (k < n) { ngramstr += " " + tokens.get(l+k); k++; }
+//				k = 1;
+//				ngramList.add(ngramstr);
+//			}
+//			for (String grams: ngramList) {
+//				if (threegrams.containsKey(grams)) { threegrams.put(grams, threegrams.get(grams) + 1); } 
+//				else { threegrams.put(grams, 1); }
+//			}ngramList.clear();
+//
+//			// Find fourgrams
+//			n = 4;
+//			k = 1;
+//			for (int m=0; m<tokens.size()-n; m++) {
+//				ngramstr = tokens.get(m);
+//				while (k < n) { ngramstr += " " + tokens.get(m+k); k++; }
+//				k = 1;
+//				ngramList.add(ngramstr);
+//			}
+//			for (String grams: ngramList) {
+//				if (fourgrams.containsKey(grams)) { fourgrams.put(grams, fourgrams.get(grams) + 1); } 
+//				else { fourgrams.put(grams, 1); }
+//			}ngramList.clear();
+			
+//			// Get the 20 most popular unigrams, bigrams, trigrams, fourgrams
+//			n = 20;
+//			
+//			List<Entry<String, Integer>> max_one = getMax(onegrams, n);
+//			System.out.println("\nTop " + n + " unigrams: ");
+//			for (Entry<String, Integer> entry : max_one) { System.out.println(entry); } System.out.println("");
+//			
+//			List<Entry<String, Integer>> max_two = getMax(twograms, n);
+//			System.out.println("Top " + n + " bigrams: ");
+//			for (Entry<String, Integer> entry : max_two) { System.out.println(entry); } System.out.println("");
+//
+//			List<Entry<String, Integer>> max_three = getMax(threegrams, n);
+//			System.out.println("Top " + n + " trigrams: ");
+//			for (Entry<String, Integer> entry : max_three) { System.out.println(entry); } System.out.println("");
+//
+//			List<Entry<String, Integer>> max_four = getMax(fourgrams, n);
+//			System.out.println("Top " + n + " fourgrams: ");
+//			for (Entry<String, Integer> entry : max_four) { System.out.println(entry); } System.out.println("");
+	        
+			// Stanford Core NLP functions
+	        String text = "";
+	        for (String token : tokens) {
+	        	text += token + " ";
+	        }
 
-		// Get the 20 most popular unigrams, bigrams, trigrams, fourgrams
-		n = 20;
-		
-		List<Entry<String, Integer>> max_one = getMax(onegrams, n);
-		System.out.println("Top " + n + " unigrams: ");
-		for (Entry<String, Integer> entry : max_one) { System.out.println(entry); } System.out.println("");
-		
-		List<Entry<String, Integer>> max_two = getMax(twograms, n);
-		System.out.println("Top " + n + " bigrams: ");
-		for (Entry<String, Integer> entry : max_two) { System.out.println(entry); } System.out.println("");
+	        StanfordNLP snlp = new StanfordNLP();
+	        StanfordNLP.process(text);
+	        
+	        snlp.getPOSNouns();	// get part-of-speech tagger for nouns
+	        snlp.getAdjNouns();
+	        
 
-		List<Entry<String, Integer>> max_three = getMax(threegrams, n);
-		System.out.println("Top " + n + " trigrams: ");
-		for (Entry<String, Integer> entry : max_three) { System.out.println(entry); } System.out.println("");
-
-		List<Entry<String, Integer>> max_four = getMax(fourgrams, n);
-		System.out.println("Top " + n + " fourgrams: ");
-		for (Entry<String, Integer> entry : max_four) { System.out.println(entry); } System.out.println("");
-		
-		// Get the 20 most popular unigrams, bigrams, trigrams, fourgrams with nouns only using Stanford CoreNLP (POS) tagger
-		n = 20;
-		
-		List<Entry<String, Integer>> pos_max_one = getMax(pos_onegrams, n);
-		System.out.println("Top " + n + " unigram (nouns only): ");
-		for (Entry<String, Integer> entry : pos_max_one) { System.out.println(entry); } System.out.println("");
-		
-		List<Entry<String, Integer>> pos_max_two = getMax(pos_twograms, n);
-		System.out.println("Top " + n + " bigrams (nouns only): ");
-		for (Entry<String, Integer> entry : pos_max_two) { System.out.println(entry); } System.out.println("");
-
-		List<Entry<String, Integer>> pos_max_three = getMax(pos_threegrams, n);
-		System.out.println("Top " + n + " trigrams (nouns only): ");
-		for (Entry<String, Integer> entry : pos_max_three) { System.out.println(entry); } System.out.println("");
-
-		List<Entry<String, Integer>> pos_max_four = getMax(pos_fourgrams, n);
-		System.out.println("Top " + n + " fourgrams (nouns only): ");
-		for (Entry<String, Integer> entry : pos_max_four) { System.out.println(entry); } System.out.println("");
+	        
+//			// Find unigram nouns only
+//			for (String grams: pos_tokens) {
+//				if (pos_onegrams.containsKey(grams)) { pos_onegrams.put(grams, pos_onegrams.get(grams) + 1); } 
+//				else { pos_onegrams.put(grams, 1); }
+//			}ngramList.clear();
+//			
+//			// Find bigram nouns only
+//			k = 1;
+//			n = 2;
+//			ngramstr = "";
+//			for (int j=0; j<pos_tokens.size()-n; j++) {
+//				ngramstr = pos_tokens.get(j);			
+//				while (k < n) {
+//					ngramstr += " " + pos_tokens.get(j+k);
+//					k++;
+//				}
+//				k = 1;
+//				ngramList.add(ngramstr);
+//			}
+//			for (String grams: ngramList) {
+//				if (pos_twograms.containsKey(grams)) { pos_twograms.put(grams, pos_twograms.get(grams) + 1); } 
+//				else { pos_twograms.put(grams, 1); }
+//			}ngramList.clear();
+//			
+//			// Find trigram nouns only
+//			n = 3;
+//			k = 1;
+//			for (int l=0; l<pos_tokens.size()-n; l++) {
+//				ngramstr = pos_tokens.get(l);
+//				while (k < n) { ngramstr += " " + pos_tokens.get(l+k); k++; }
+//				k = 1;
+//				ngramList.add(ngramstr);
+//			}
+//			for (String grams: ngramList) {
+//				if (pos_threegrams.containsKey(grams)) { pos_threegrams.put(grams, pos_threegrams.get(grams) + 1); } 
+//				else { pos_threegrams.put(grams, 1); }
+//			}ngramList.clear();
+//
+//			// Find fourgram nouns only
+//			n = 4;
+//			k = 1;
+//			for (int m=0; m<pos_tokens.size()-n; m++) {
+//				ngramstr = pos_tokens.get(m);
+//				while (k < n) { ngramstr += " " + pos_tokens.get(m+k); k++; }
+//				k = 1;
+//				ngramList.add(ngramstr);
+//			}
+//			for (String grams: ngramList) {
+//				if (pos_fourgrams.containsKey(grams)) { pos_fourgrams.put(grams, pos_fourgrams.get(grams) + 1); } 
+//				else { pos_fourgrams.put(grams, 1); }
+//			}
+//			ngramList.clear(); pos_tokens.clear(); tokens.clear();
+//		}
+//		
+//		// Get the 20 most popular unigrams, bigrams, trigrams, fourgrams with nouns only using Stanford CoreNLP (POS) tagger
+//		n = 20;
+//		
+//		List<Entry<String, Integer>> pos_max_one = getMax(pos_onegrams, n);
+//		System.out.println("Top " + n + " unigram (nouns only): ");
+//		for (Entry<String, Integer> entry : pos_max_one) { System.out.println(entry); } System.out.println("");
+//		
+//		List<Entry<String, Integer>> pos_max_two = getMax(pos_twograms, n);
+//		System.out.println("Top " + n + " bigrams (nouns only): ");
+//		for (Entry<String, Integer> entry : pos_max_two) { System.out.println(entry); } System.out.println("");
+//
+//		List<Entry<String, Integer>> pos_max_three = getMax(pos_threegrams, n);
+//		System.out.println("Top " + n + " trigrams (nouns only): ");
+//		for (Entry<String, Integer> entry : pos_max_three) { System.out.println(entry); } System.out.println("");
+//
+//		List<Entry<String, Integer>> pos_max_four = getMax(pos_fourgrams, n);
+//		System.out.println("Top " + n + " fourgrams (nouns only): ");
+//		for (Entry<String, Integer> entry : pos_max_four) { System.out.println(entry); } System.out.println("");
 		
 //		// Get the 10 most popular named entities
 //		n = 10;
