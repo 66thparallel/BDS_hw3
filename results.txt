@@ -1,0 +1,43 @@
+Top 20 hashtags:  
+ #therapyfail,  #TTSC,  #apple,  #Eric,  #tweetdeck,  #expletives,  #Skype,  #music,  #camerafail,  #FML,  #3,  #fb,  #itm,  #gayforpeavy,  #24,  #charitytuesday,  #Alexa,  #haveyouever,  #Iphone,  #fail,  
+
+Top 20 @-mentions:  
+ @trouble2111,  @iamlilnicki,  @ppinheiro76,  @lauraw,  @GuyNGirlTravels,  @SpeakingUpH4H,  @CarlyRush,  @PoisonArie,  @LaTati,  @MTUB,  @PinkElephant73,  @jeancjumbe,  @eggirock,  @amoir,  @DAChesterFrench,  @ksymmonds,  @ShareThis,  @ddlovato,  @eastwestchic,  @kenshinwanderin,  
+
+Top 20 unigrams:  
+morning, bed, find, bad, feel, sick, night, Just, sad, home, sleep, tomorrow, love, My, work, back, today, time, good, day,  
+
+Top 20 bigrams:  
+love love, iPhone OS, iPhone update, home school, macbook fell, Good morning, hours sleep, update iPhone, early tonight, hate sick, good morning, fingers crossed, head hurts, Oh dear, Sandra Cantu, spring break, sad feet, feel bad, Too bad, Cant wait,  
+ 
+Top 20 trigrams:  
+Brent praise band, O transformer movie, wanted update iPhone, lead guitarist pout, praise band No, missed Brent praise, Awwh babs sad, sad underneith shop, puppies meant glow, No fun lead, shop entrance Yesterdays, band No fun, Musik O transformer, update iPhone OS, shit today screwed, underneith shop entrance, Ihad find answer, entrance Yesterdays Musik, feet macbook fell, sad feet macbook,  
+ 
+Top 20 fourgrams:  
+understand works blame things, brixton ages working dunno, work sick Same iMac, Awwh babs sad underneith, sad underneith shop entrance, entrance Yesterdays Musik O, babs sad underneith shop, response Ihad find answer, band No fun lead, praise band No fun, No fun lead guitarist, missed Brent praise band, Musik O transformer movie, Brent praise band No, wanted update iPhone OS, fun lead guitarist pout, shop entrance Yesterdays Musik, underneith shop entrance Yesterdays, Yesterdays Musik O transformer, sad feet macbook fell,  
+ 
+Top 20 POS noun unigrams:  
+life, fun, hate, school, job, tonight, feeling, week, twitter, morning, bed, sleep, night, love, home, work, tomorrow, today, time, day,  
+ 
+Top 20 POS noun bigrams:  
+Awwh underneith, O transformer, love cry, Kutner House, time work, tomorrow today, day camp, surgery today, tomorrow morning, day tomorrow, day week, Musik O, thing world, hate feeling, uni stuff, iPhone OS, spring break, day day, Sandra Cantu, home school,  
+ 
+Top 20 POS noun trigrams:  
+NY day drink, today study exam, shit today Job, hoo streeeet kate, ugh sleep Crooners, song blink doubt, Hope day friendster, start thing problem, lead guitarist pout, Awwh underneith shop, du n twitter, fun lead guitarist, shop entrance Musik, Musik O transformer, underneith shop entrance, band fun lead, entrance Musik O, O transformer movie, response Ihad answer, Brent band fun,  
+ 
+Top 20 POS noun fourgrams:  
+pity eww history time, Twitter fix background man, picture day Havent Sky, hahaa word team Wahh, Friend Mine Raining weather, today love twitter USPS, holiday shower turn paper, picture square caterpillar face, family bed Hills throat, today dentist trip lip, coladabanana slushie upload hAhAHA, Cook County huuuge headache, Awwh underneith shop entrance, entrance Musik O transformer, underneith shop entrance Musik, band fun lead guitarist, Brent band fun lead, fun lead guitarist pout, Musik O transformer movie, shop entrance Musik O,
+
+Top 10 POS adjective-nouns:  
+good day, happy birthday, sore throat, long day, red carpet, glad feeling, long time, good morning, Good morning, Cant wait,  
+
+Top 10 POS adverb-adjective-nouns:  
+tonight early start, Too bad Life, back happy man, ha good job, extremely happy girl, perfectly reasonable time, absolutely perfect schedule, Back rainy reston, pretty boring comparison, personally strawberry coach,  
+
+Top 10 POS adverb-verbs:  
+very pretty, more sleep, 
+
+Top 10 named entities:  
+LOCATION, COUNTRY, CITY, TITLE, MISC, ORGANIZATION, TIME, DURATION, PERSON, DATE,  
+
+
