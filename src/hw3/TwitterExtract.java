@@ -160,7 +160,12 @@ public class TwitterExtract {
 			tempstr = texts[i].split("\\s+");
 			for (String s: tempstr) { if(s!=null || s!="") { tokens.add(s); }}
 			for(String word: stopwords){
-				if(tokens.contains(word)) { tokens.removeAll(Collections.singleton(word)); }
+				String cap = Character.toUpperCase(word.charAt(0)) + word.substring(1);
+				if(tokens.contains(word) || tokens.contains(word.toUpperCase()) || tokens.contains(cap)) { 
+					tokens.removeAll(Collections.singleton(word));
+					tokens.removeAll(Collections.singleton(word.toUpperCase()));
+					tokens.removeAll(Collections.singleton(cap));
+				}
 			}
 		}
 			
@@ -243,8 +248,8 @@ public class TwitterExtract {
         	text += token + " ";
         }
 
-        StanfordNLP snlp = new StanfordNLP();
-        StanfordNLP.process(text);
+        StanfordNLP snlp = new StanfordNLP(text);
+        snlp.process();
         
         pos_tokens = snlp.getPOSNouns();	// get part-of-speech tagger for nouns
 

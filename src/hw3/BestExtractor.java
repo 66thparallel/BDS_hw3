@@ -113,7 +113,12 @@ public class BestExtractor {
 			tempstr0 = texts0[i].split("\\s+");
 			for (String s: tempstr0) { if(s!=null || s!="") { tokens0.add(s); }}
 			for(String word: stopwords){
-				if(tokens0.contains(word)) { tokens0.removeAll(Collections.singleton(word)); }
+				String cap = Character.toUpperCase(word.charAt(0)) + word.substring(1);
+				if(tokens0.contains(word) || tokens0.contains(word.toUpperCase()) || tokens0.contains(cap)) { 
+					tokens0.removeAll(Collections.singleton(word));
+					tokens0.removeAll(Collections.singleton(word.toUpperCase()));
+					tokens0.removeAll(Collections.singleton(cap));
+				}
 			}
 		}
 		
@@ -141,7 +146,12 @@ public class BestExtractor {
 			tempstr4 = texts4[i].split("\\s+");
 			for (String s: tempstr4) { if(s!=null || s!="") { tokens4.add(s); }}
 			for(String word: stopwords){
-				if(tokens4.contains(word)) { tokens4.removeAll(Collections.singleton(word)); }
+				String cap = Character.toUpperCase(word.charAt(0)) + word.substring(1);
+				if(tokens4.contains(word) || tokens4.contains(word.toUpperCase()) || tokens4.contains(cap)) { 
+					tokens4.removeAll(Collections.singleton(word));
+					tokens4.removeAll(Collections.singleton(word.toUpperCase()));
+					tokens4.removeAll(Collections.singleton(cap));
+				}
 			}
 		}
 		
@@ -152,11 +162,9 @@ public class BestExtractor {
         	text0 += token + " ";
         }
 
-        StanfordNLP snlp0 = new StanfordNLP();
-        snlp0.process(text0);
+        StanfordNLP snlp0 = new StanfordNLP(text0);
+        pos_tokens0 = snlp0.process();
         
-        pos_tokens0 = snlp0.getAdjNouns();
-
 		Map<String, Integer> pos_adjnouns0 = new HashMap<String, Integer>();
 		
 		for (String grams: pos_tokens0) {
@@ -171,11 +179,9 @@ public class BestExtractor {
         	text4 += token + " ";
         }
 
-        StanfordNLP snlp4 = new StanfordNLP();
-        snlp4.process(text4);
+        StanfordNLP snlp4 = new StanfordNLP(text4);
+        pos_tokens4 = snlp4.process();
         
-        pos_tokens4 = snlp4.getAdjNouns();
-
 		Map<String, Integer> pos_adjnouns4 = new HashMap<String, Integer>();
 		
 		for (String grams: pos_tokens4) {
@@ -187,12 +193,12 @@ public class BestExtractor {
 		int n = 30;
 		
 		List<Entry<String, Integer>> max_adjnoun0 = getMax(pos_adjnouns0, n);
-		List<String> pos_maxone_list0 = max_adjnoun0.stream().map(Entry::getKey).collect(Collectors.toList());
-		print(pos_maxone_list0, "30 adjective-nouns for negative tweets");
+		List<String> adjnoun_list0 = max_adjnoun0.stream().map(Entry::getKey).collect(Collectors.toList());
+		print(adjnoun_list0, "30 adjective-nouns for negative tweets");
 		
 		List<Entry<String, Integer>> max_adjnoun4 = getMax(pos_adjnouns4, n);
-		List<String> pos_maxone_list4 = max_adjnoun4.stream().map(Entry::getKey).collect(Collectors.toList());
-		print(pos_maxone_list4, "30 adjective-nouns for positive tweets");
+		List<String> adjnoun_list4 = max_adjnoun4.stream().map(Entry::getKey).collect(Collectors.toList());
+		print(adjnoun_list4, "30 adjective-nouns for positive tweets");
 		
 	}
 	

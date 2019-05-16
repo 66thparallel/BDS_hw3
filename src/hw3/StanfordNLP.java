@@ -33,8 +33,14 @@ public class StanfordNLP {
 	public static List<String> pos_advadjnouns = new ArrayList<String>();
 	public static List<String> pos_advvb = new ArrayList<String>();
 	public static List<String> named_entities = new ArrayList<String>();
+	public static String documentText = "";
+	
+	public StanfordNLP() {}
+	public StanfordNLP(String text) {
+		this.documentText = text;
+	}
 
-	public static void process(String documentText) {
+	public List<String> process() {
 		
 	    Properties props = new Properties();
 	    props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, depparse");
@@ -107,7 +113,7 @@ public class StanfordNLP {
         			}
         		}
         		// find adverb-verb (eg, "quietly talk")
-        		else if (pos.equals("VB")) {
+        		else if (pos2.equals("VB")) {
         			word = word + " " + word2;
         			pos_advvb.add(word);
         		}
@@ -122,6 +128,7 @@ public class StanfordNLP {
         	}
 
         }
+        return pos_adjnouns;
 	}
 	
 	public List<String> getPOSNouns() {
