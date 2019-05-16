@@ -5,9 +5,9 @@ package hw3;
  * Homework 3: Twitter Keyword Extraction
  * 
  * Classes:
- * 	Main: Performs preprocessing, gets the top 20 hashtags and @-mentions. Gets top 20 unigrams, bigrams, 
- * 	trigrams, and fourgrams for all tokens and for just nouns. Calls StanfordNLP class methods and gets 
- * 	results from the POS tagger, dependency parser, and named entity tagger.
+ * 	Main: Performs preprocessing, gets the top hashtags and @-mentions. Gets top unigrams, bigrams, 
+ * 	trigrams, and fourgrams. Calls StanfordNLP class methods and gets results from the POS tagger, 
+ * 	dependency parser, and named entity tagger.
  */
 
 import java.io.BufferedReader;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 public class TwitterExtract {
 	
-	private static String filename = "data/sentiment140_part.csv";
+	private static String filename = "data/sentiment140.csv";
 
 	public static void main(String[] args) {
 
@@ -328,7 +328,7 @@ public class TwitterExtract {
 		// Get 10 most frequency POS patterns
 		n = 10;
 		
-		// pattern: adjective-noun
+		// POS patterns
 		Map<String, Integer> pos_adjnouns = new HashMap<String, Integer>();
 		Map<String, Integer> pos_advadjnouns = new HashMap<String, Integer>();
 		Map<String, Integer> pos_advvb = new HashMap<String, Integer>();
@@ -362,7 +362,7 @@ public class TwitterExtract {
 		
 		List<Entry<String, Integer>> pos_max_advvb = getMax(pos_advvb, n);
 		List<String> pos_maxadvvb_list = pos_max_advvb.stream().map(Entry::getKey).collect(Collectors.toList());
-		print(pos_maxadvvb_list, "10 POS adjverb-verbs");
+		print(pos_maxadvvb_list, "10 POS adverb-verbs");
 		
 		// The most common named entities in the dataset
 		Map<String, Integer> pos_ners = new HashMap<String, Integer>();

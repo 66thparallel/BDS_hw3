@@ -5,8 +5,8 @@ package hw3;
  * Homework 3
  *
  * Classes:
- * 	StanfordNLP: generates POS tagger for nouns and other parts of speech patterns, runs the 
-	syntactic dependency parser and named-entity tagger.
+ * 	StanfordNLP: generates POS tagger for nouns and other patterns, runs the syntactic dependency 
+ * 	parser and named-entity tagger.
  */
 
 import java.util.ArrayList;
@@ -106,8 +106,8 @@ public class StanfordNLP {
         				pos_advadjnouns.add(word);
         			}
         		}
-        		// find adverb-verb gerunds (eg, "quietly talking")
-        		else if (pos.equals("VBG")) {
+        		// find adverb-verb (eg, "quietly talk")
+        		else if (pos.equals("VB")) {
         			word = word + " " + word2;
         			pos_advvb.add(word);
         		}

@@ -3,9 +3,9 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=2
-#SBATCH --time=24:00:00
-#SBATCH --mem=80GB
-#SBATCH --job-name=JaneLiu_HW3
+#SBATCH --time=1:00:00
+#SBATCH --mem=100GB
+#SBATCH --job-name=JL
 #SBATCH --mail-type=END
 #SBATCH --mail-user=jl860@nyu.edu
 #SBATCH --output=slurm_%j.out

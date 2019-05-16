@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 public class BestExtractor {
 	
-	private static String filename = "data/sentiment140_part.csv";
+	private static String filename = "data/sentiment140.csv";
 	
 	public static void start() {
 		
@@ -42,17 +42,19 @@ public class BestExtractor {
 		File f = new File("bestextraction.txt");
 		if(f.exists()){f.delete();}
 
-		// Read sentiment140.csv and extract the "text" column of raw tweets.
+		// Read sentiment140.csv and extract the "text" column of positive "4" and negative "0" tweets.
 		BufferedReader reader;
 		try {
 			reader = new BufferedReader(new FileReader(filename));
 			String line = reader.readLine();
 
 			while (line != null) {
-				String[] temp = line.split("\",");
-				
-				if (temp[0]=="0") { tweets0.add(temp[5]); }
-				else if (temp[0]=="4") { tweets4.add(temp[5]); }
+				line = line.replaceAll("\"", "");
+				String[] temp = line.split(",");
+				String num = temp[0].replaceAll(" ", "");
+
+				if (num.equals("0")) { tweets0.add(temp[5]); }
+				else if (num.equals("4")) { tweets4.add(temp[5]); }
 				
 				line = reader.readLine();
 			}
@@ -61,7 +63,7 @@ public class BestExtractor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		// Read a list of Twitter stopwords
+
 		try {
 			reader = new BufferedReader(new FileReader("data/twitter_stopwords.txt"));
 			String line2 = reader.readLine();
@@ -78,18 +80,16 @@ public class BestExtractor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		String[] texts0 = new String[tweets0.size()];
-		String[] texts4 = new String[tweets4.size()];
+				
+		String[] texts0 = tweets0.toArray(new String[tweets0.size()]);
+		String[] texts4 = tweets4.toArray(new String[tweets4.size()]);
 
-		// Preprocessing: remove hashtags, @-mentions, URLs, stopwords, emojis, and unnecessary characters
 		List<String> tokens0 = new ArrayList<String>();
 		List<String> tokens4 = new ArrayList<String>();
-		List<String> ngramList = new ArrayList<String>();
 		String[] tempstr0;
 		String[] tempstr4;
 		
-		// clean up negative tweets
+		// clean negative tweets
 		for (int i = 0; i < texts0.length; i++) {
 			texts0[i] = texts0[i].replaceAll("\"", "");
 			texts0[i] = texts0[i].replaceAll("#[A-Za-z0-9-_]+", "");
@@ -117,7 +117,7 @@ public class BestExtractor {
 			}
 		}
 		
-		// clean up positive tweets
+		// clean positive tweets
 		for (int i = 0; i < texts4.length; i++) {
 			texts4[i] = texts4[i].replaceAll("\"", "");
 			texts4[i] = texts4[i].replaceAll("#[A-Za-z0-9-_]+", "");
@@ -145,7 +145,7 @@ public class BestExtractor {
 			}
 		}
 		
-		// Get unigram and bigram nouns for negative tweets
+		// Get adjective-nouns for negative tweets
 		List<String> pos_tokens0 = new ArrayList<String>();
         String text0 = "";
         for (String token : tokens0) {
@@ -153,38 +153,18 @@ public class BestExtractor {
         }
 
         StanfordNLP snlp0 = new StanfordNLP();
-        StanfordNLP.process(text0);
+        snlp0.process(text0);
         
-        pos_tokens0 = snlp0.getAdjNouns();	// get part-of-speech tagger for nouns
+        pos_tokens0 = snlp0.getAdjNouns();
 
-		Map<String, Integer> pos_onegrams0 = new HashMap<String, Integer>();
-		Map<String, Integer> pos_twograms0 = new HashMap<String, Integer>();
+		Map<String, Integer> pos_adjnouns0 = new HashMap<String, Integer>();
 		
-		// Find unigram nouns only
 		for (String grams: pos_tokens0) {
-			if (pos_onegrams0.containsKey(grams)) { pos_onegrams0.put(grams, pos_onegrams0.get(grams) + 1); } 
-			else { pos_onegrams0.put(grams, 1); }
+			if (pos_adjnouns0.containsKey(grams)) { pos_adjnouns0.put(grams, pos_adjnouns0.get(grams) + 1); } 
+			else { pos_adjnouns0.put(grams, 1); }
 		}
 		
-		// Find bigram nouns only
-		int k = 1;
-		int n = 2;
-		String ngramstr = "";
-		for (int j=0; j<pos_tokens0.size()-n; j++) {
-			ngramstr = pos_tokens0.get(j);			
-			while (k < n) {
-				ngramstr += " " + pos_tokens0.get(j+k);
-				k++;
-			}
-			k = 1;
-			ngramList.add(ngramstr);
-		}
-		for (String grams: ngramList) {
-			if (pos_twograms0.containsKey(grams)) { pos_twograms0.put(grams, pos_twograms0.get(grams) + 1); } 
-			else { pos_twograms0.put(grams, 1); }
-		}ngramList.clear();
-		
-		// Get unigram and bigram nouns for positive tweets
+		// Get adjective-nouns for positive tweets
 		List<String> pos_tokens4 = new ArrayList<String>();
         String text4 = "";
         for (String token : tokens4) {
@@ -192,51 +172,31 @@ public class BestExtractor {
         }
 
         StanfordNLP snlp4 = new StanfordNLP();
-        StanfordNLP.process(text4);
+        snlp4.process(text4);
         
-        pos_tokens4 = snlp4.getAdjNouns();	// get part-of-speech tagger for nouns
+        pos_tokens4 = snlp4.getAdjNouns();
 
-		Map<String, Integer> pos_onegrams4 = new HashMap<String, Integer>();
-		Map<String, Integer> pos_twograms4 = new HashMap<String, Integer>();
+		Map<String, Integer> pos_adjnouns4 = new HashMap<String, Integer>();
 		
-		// Find unigram nouns only
 		for (String grams: pos_tokens4) {
-			if (pos_onegrams4.containsKey(grams)) { pos_onegrams4.put(grams, pos_onegrams4.get(grams) + 1); } 
-			else { pos_onegrams4.put(grams, 1); }
+			if (pos_adjnouns4.containsKey(grams)) { pos_adjnouns4.put(grams, pos_adjnouns4.get(grams) + 1); } 
+			else { pos_adjnouns4.put(grams, 1); }
 		}
 		
-		// Find bigram nouns only
-		k = 1;
-		n = 2;
-		ngramstr = "";
-		for (int j=0; j<pos_tokens4.size()-n; j++) {
-			ngramstr = pos_tokens4.get(j);			
-			while (k < n) {
-				ngramstr += " " + pos_tokens4.get(j+k);
-				k++;
-			}
-			k = 1;
-			ngramList.add(ngramstr);
-		}
-		for (String grams: ngramList) {
-			if (pos_twograms4.containsKey(grams)) { pos_twograms4.put(grams, pos_twograms4.get(grams) + 1); } 
-			else { pos_twograms4.put(grams, 1); }
-		}ngramList.clear();
+		// Print most frequent adjective-nouns for positive and negative tweets
+		int n = 30;
 		
-		// Print top 20 most frequent ngram nouns using Stanford CoreNLP for positive and negative tweets
-		n = 30;
-		
-		List<Entry<String, Integer>> pos_max_one0 = getMax(pos_onegrams0, n);
-		List<String> pos_maxone_list0 = pos_max_one0.stream().map(Entry::getKey).collect(Collectors.toList());
+		List<Entry<String, Integer>> max_adjnoun0 = getMax(pos_adjnouns0, n);
+		List<String> pos_maxone_list0 = max_adjnoun0.stream().map(Entry::getKey).collect(Collectors.toList());
 		print(pos_maxone_list0, "30 adjective-nouns for negative tweets");
 		
-		List<Entry<String, Integer>> pos_max_one4 = getMax(pos_onegrams4, n);
-		List<String> pos_maxone_list4 = pos_max_one4.stream().map(Entry::getKey).collect(Collectors.toList());
+		List<Entry<String, Integer>> max_adjnoun4 = getMax(pos_adjnouns4, n);
+		List<String> pos_maxone_list4 = max_adjnoun4.stream().map(Entry::getKey).collect(Collectors.toList());
 		print(pos_maxone_list4, "30 adjective-nouns for positive tweets");
 		
 	}
 	
-	// Use a PriorityQueue to get top 20 hashtags, @-mentions, and ngrams
+	// Use a PriorityQueue to get top hashtags, @-mentions, and ngrams
 	private static <K, V extends Comparable<? super V>> List<Entry<K, V>> getMax(Map<K, V> map, int n) {
 		Comparator<? super Entry<K, V>> comparator = new Comparator<Entry<K, V>>() {
 			@Override
@@ -262,7 +222,7 @@ public class BestExtractor {
 	
 	private static void print(List<String> alist, String type) {
 		
-		// output to results.txt file
+		// output to file
 	    try {
             FileWriter writer = new FileWriter("bestextraction.txt", true);
             BufferedWriter bufferedWriter = new BufferedWriter(writer);
